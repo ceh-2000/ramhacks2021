@@ -40,5 +40,7 @@ class Constants {
   static const maxUsernameLength = 50;
   static const maxPasswordLength = 50;
 
+  //Firestore
+  static const firebaseCollectionDevices = 'devices';
 
 }

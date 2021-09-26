@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 import 'constants.dart';
 import 'report.dart';
@@ -6,7 +7,12 @@ import 'calendar.dart';
 import 'data_vis.dart';
 import 'mission.dart';
 
-void main() {
+Future<void> main() async {
+  // Checks to make sure everything is initialized
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp();
+
   runApp(const MyApp());
 }
 
@@ -16,6 +22,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Healthy Women',
       theme: ThemeData(
         primarySwatch: Constants.kToDark,

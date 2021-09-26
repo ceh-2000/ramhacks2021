@@ -43,4 +43,7 @@ class Constants {
   static const mediumFont = 25.0;
   static const largeFont = 60.0;
   static const spacer = 15.0;
+
+  //Firestore
+  static const firebaseCollectionDevices = 'devices';
 }

@@ -14,15 +14,15 @@ class DataVis extends StatefulWidget {
 
 class _DataVis extends State<DataVis> {
   // Get the data to put into our series
-  List<Series<FlowData, int>> _getSeriesData(data) {
-    List<charts.Series<FlowData, int>> series = [
+  List<Series<FlowData, DateTime>> _getSeriesData(data) {
+    List<charts.Series<FlowData, DateTime>> series = [
       charts.Series(
           id: 'Flow',
           data: data,
-          domainFn: (FlowData series, _) => series.date_time.day,
+          domainFn: (FlowData series, _) => series.date_time,
           measureFn: (FlowData series, _) => series.count,
-          colorFn: (FlowData series, _) =>
-          charts.MaterialPalette.blue.shadeDefault),
+          colorFn: (_, __) => charts.MaterialPalette.purple.shadeDefault,
+    ),
 
     ];
     return series;
@@ -70,7 +70,7 @@ class _DataVis extends State<DataVis> {
                                     List<FlowData> flowData = produceListOfFlowData(results);
 
                                     return Expanded(
-                                      child: new charts.LineChart(
+                                      child: new charts.TimeSeriesChart(
                                         _getSeriesData(flowData),
                                         animate: true,
                                       ),

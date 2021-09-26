@@ -199,7 +199,7 @@ class _Report extends State<Report> {
                       color: Constants.color1,
                     ),
                     borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text('\~\$'+(_sumTampons*AVG_COST_PER_TAMPON).toString(),
+                child: Text('\~\$'+(num.parse((_sumTampons*AVG_COST_PER_TAMPON).toStringAsFixed(2))).toString(),
                     style: TextStyle(
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),

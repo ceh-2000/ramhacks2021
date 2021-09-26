@@ -69,12 +69,12 @@ class _Report extends State<Report> {
       }
 
       DateTime startDate = dates[dates.length - 1].date_time;
-      _numDaysInCycle = dates.length;
+      _numDaysInCycle = dates.length+1;
       _periodStartDate = months[startDate.month.toString()].toString() +
           ' ' +
           startDate.day.toString();
 
-      _tamponsUsedAverage = (_sumTampons / _numDaysInCycle).floor();
+      _tamponsUsedAverage = (_sumTampons / _numDaysInCycle+1).floor();
     }
   }
 
@@ -92,7 +92,7 @@ class _Report extends State<Report> {
                       color: Constants.color1,
                     ),
                     borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text('Sep 23',
+                child: Text(_periodStartDate,
                     style: TextStyle(
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
@@ -147,7 +147,7 @@ class _Report extends State<Report> {
             Flexible(
                 child: Text('You used',
                     style: TextStyle(fontSize: Constants.smallFont))),
-            SizedBox(width: Constants.spacer),
+            SizedBox(width: 5.0),
             Container(
                 padding: EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
@@ -160,8 +160,8 @@ class _Report extends State<Report> {
                     style: TextStyle(
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
-            SizedBox(width: Constants.spacer),
-            Text('on your heaviest day.',
+            SizedBox(width: 5.0),
+            Text('tampons on your heaviest day.',
                 style: TextStyle(fontSize: Constants.smallFont))
           ]),
           SizedBox(height: Constants.spacer),
@@ -169,7 +169,7 @@ class _Report extends State<Report> {
             Flexible(
                 child: Text('You used',
                     style: TextStyle(fontSize: Constants.smallFont))),
-            SizedBox(width: Constants.spacer),
+            SizedBox(width: 5.0),
             Container(
                 padding: EdgeInsets.all(10.0),
                 decoration: BoxDecoration(
@@ -182,8 +182,8 @@ class _Report extends State<Report> {
                     style: TextStyle(
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
-            SizedBox(width: Constants.spacer),
-            Text('on average per day.',
+            SizedBox(width: 5.0),
+            Text('tampons on average per day.',
                 style: TextStyle(fontSize: Constants.smallFont))
           ]),
           SizedBox(height: Constants.spacer),

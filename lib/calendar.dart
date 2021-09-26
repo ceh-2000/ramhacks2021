@@ -1,9 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:table_calendar/table_calendar.dart';
-import 'package:intl/intl.dart';
-import 'package:google_fonts/google_fonts.dart';
 
 import 'constants.dart';
+import 'flow_data.dart';
 
 class Calendar extends StatefulWidget {
   @override
@@ -26,19 +26,97 @@ class _Calendar extends State<Calendar> {
 
     // Read in all events ever from Firebase
     _events = {
-      DateTime.utc(2021, 8, 25): ['Tampon', 'Tampon'],
-      DateTime.utc(2021, 8, 26): ['Tampon', 'Tampon', 'Tampon', 'Tampon', 'Tampon'],
-      DateTime.utc(2021, 8, 27): ['Tampon', 'Tampon', 'Tampon', 'Tampon'],
-      DateTime.utc(2021, 8, 28): ['Tampon'],
-      DateTime.utc(2021, 9, 22): ['Tampon', 'Tampon'],
-      DateTime.utc(2021, 9, 23): ['Tampon', 'Tampon', 'Tampon', 'Tampon', 'Tampon'],
-      DateTime.utc(2021, 9, 24): ['Tampon', 'Tampon', 'Tampon' ],
-      DateTime.utc(2021, 9, 25): ['Tampon', 'Tampon'],
+      DateTime.utc(2021, 9, 20): ['tampon']
     };
   }
 
-  List<dynamic> _getEventsForDay(day){
+  List<dynamic> _getEventsForDay(day) {
     return _events[day] ?? [];
+  }
+
+  Widget buildBody(Map<DateTime, List<String>> my_events){
+    return Column(
+      children: <Widget>[
+        TableCalendar(
+          firstDay: _firstDay,
+          lastDay: _lastDay,
+          calendarFormat: _calendarFormat,
+          calendarStyle: const CalendarStyle(
+            canMarkersOverflow: true,
+            todayDecoration: BoxDecoration(
+              color: Constants.color1,
+              shape: BoxShape.circle,
+            ),
+            markersMaxCount: 10,
+            markerSizeScale: 0.0,
+            markerMargin: EdgeInsets.symmetric(
+                horizontal: 5.0),
+            markerDecoration: Icon(
+              Icons.invert_colors,
+              color: Colors.red,
+              size: 15.0,
+            ),
+            selectedDecoration: BoxDecoration(
+              color: Constants.color1Dark,
+              shape: BoxShape.circle,
+            ),
+          ),
+          focusedDay: DateTime.now(),
+          selectedDayPredicate: (day) {
+            // Use `selectedDayPredicate` to determine which day is currently selected.
+            return isSameDay(_selectedDay, day);
+          },
+          onDaySelected:
+              (selectedDay, focusedDay) {
+            if (!isSameDay(
+                _selectedDay, selectedDay)) {
+              // TODO: Add code to allow user to manually enter data about tampon use
+
+              // Call `setState()` when updating the selected day
+              setState(() {
+                _selectedDay = selectedDay;
+                _focusedDay = focusedDay;
+              });
+            }
+          },
+          onFormatChanged: (format) {
+            if (_calendarFormat != format) {
+              // Call `setState()` when updating calendar format
+              setState(() {
+                _calendarFormat = format;
+              });
+            }
+          },
+          eventLoader: (day) {
+            List<String> v_emi = [];
+            my_events.forEach((k, v){
+              if(day.toString().substring(0, day.toString().length-1) == k.toString()){
+                v_emi = v;
+              }
+            });
+            return v_emi;
+          },
+          onPageChanged: (focusedDay) {
+            // No need to call `setState()` here
+            _focusedDay = focusedDay;
+          },
+          calendarBuilders: CalendarBuilders(),
+        ),
+        SizedBox(height: Constants.spacer),
+        _getEventsForDay(_selectedDay).length >
+            0
+            ? Text(
+            'Number of tampons: ' +
+                _getEventsForDay(
+                    _selectedDay)
+                    .length
+                    .toString(),
+            style: TextStyle(
+                fontSize:
+                Constants.mediumFont))
+            : const SizedBox(height: 29.0),
+      ],
+    );
   }
 
   @override
@@ -59,67 +137,45 @@ class _Calendar extends State<Calendar> {
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: <Widget>[
                               // Content starts here
-                              TableCalendar(
-                                firstDay: _firstDay,
-                                lastDay: _lastDay,
-                                calendarFormat: _calendarFormat,
-                                calendarStyle: const CalendarStyle(
-                                  canMarkersOverflow: true,
-                                  todayDecoration: BoxDecoration(
-                                    color: Constants.color1,
-                                    shape: BoxShape.circle,
-                                  ),
+                              StreamBuilder(
+                                  // The stream is where we want to read from continuously
+                                  stream: FirebaseFirestore.instance
+                                      .collection(
+                                          Constants.firebaseCollectionDevices)
+                                      .snapshots(),
+                                  // The builder is what we do with the data from our stream
+                                  builder: (BuildContext context,
+                                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                                    // We got no data yet so let's wait...
+                                    if (snapshot.hasData) {
+                                      List<dynamic> results =
+                                          snapshot.data?.docs ?? [];
 
-                                  markersMaxCount: 10,
-                                  markerSizeScale: 0.0,
-                                  markerMargin: EdgeInsets.symmetric(horizontal: 5.0),
-                                  markerDecoration: Icon(
-                                    Icons.invert_colors,
-                                    color: Colors.red,
-                                    size: 15.0,
-                                  ),
-                                  selectedDecoration: BoxDecoration(
-                                    color: Constants.color1Dark,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                focusedDay: DateTime.now(),
-                                selectedDayPredicate: (day) {
-                                  // Use `selectedDayPredicate` to determine which day is currently selected.
-                                  return isSameDay(_selectedDay, day);
-                                },
-                                onDaySelected: (selectedDay, focusedDay) {
-                                  if (!isSameDay(_selectedDay, selectedDay)) {
-                                    // TODO: Add code to allow user to manually enter data about tampon use
+                                      // Produce list of date and times
+                                      List<FlowData> flowData =
+                                      produceListOfFlowData(results);
 
-                                    // Call `setState()` when updating the selected day
-                                    setState(() {
-                                      _selectedDay = selectedDay;
-                                      _focusedDay = focusedDay;
-                                    });
-                                  }
-                                },
-                                onFormatChanged: (format) {
-                                  if (_calendarFormat != format) {
-                                    // Call `setState()` when updating calendar format
-                                    setState(() {
-                                      _calendarFormat = format;
-                                    });
-                                  }
-                                },
-                                eventLoader: (day) {
-                                  return _getEventsForDay(day);
-                                },
-                                onPageChanged: (focusedDay) {
-                                  // No need to call `setState()` here
-                                  _focusedDay = focusedDay;
-                                },
-                                calendarBuilders: CalendarBuilders(
-                                ),
+                                      Map<DateTime, List<String>> my_events = {};
+                                      for (int i = 0; i < flowData.length; i++) {
+                                        DateTime key = flowData[i].date_time;
+                                        List<String> value = flowData[i].flowy;
 
-                              ),
-                              SizedBox(height: Constants.spacer),
-                              _getEventsForDay(_selectedDay).length > 0 ? Text('Number of tampons: '+_getEventsForDay(_selectedDay).length.toString(), style: TextStyle(fontSize: Constants.mediumFont)) : const SizedBox(height: 29.0),
+                                        my_events[key] = value;
+                                      }
+
+                                      return buildBody(my_events);
+                                    }
+                                    else{
+                                      return Center(
+                                          child: SizedBox(
+                                              width: 100,
+                                              height: 100,
+                                              child: CircularProgressIndicator(
+                                                  strokeWidth: 12,
+                                                  color: Constants.color2)));
+                                    }
+
+                                  })
                             ]))))));
   }
 }

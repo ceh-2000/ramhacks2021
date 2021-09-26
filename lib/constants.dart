@@ -39,6 +39,8 @@ class Constants {
   //////////////////// Numbers
   static const maxUsernameLength = 50;
   static const maxPasswordLength = 50;
-
-
+  static const smallFont = 18.0;
+  static const mediumFont = 25.0;
+  static const largeFont = 60.0;
+  static const spacer = 15.0;
 }

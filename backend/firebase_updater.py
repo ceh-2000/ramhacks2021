@@ -5,6 +5,7 @@ from firebase_admin import credentials
 from firebase_admin import db
 from gpiozero import Button
 from servo_manager import *
+from tm1637 import * # External library
 
 # Get last document in a collection as a dict
 # Unused, but kept in case later
@@ -45,6 +46,28 @@ def get_matching_doc(coll, key):
     if i.id == key:
       return i
 
+def process_press(display, servo_man, digits_num):
+  servo_man.inc_press(1)
+  digits_num += 1
+  display.ShowInt(digits_num)
+  doc_ref.update({'button_log': firestore.ArrayUnion([dt.datetime.now()])})
+  return digits_num
+
+def init_display():
+  display = TM1637(CLK=18, DIO=24, brightness=1.0)
+  display.Clear()
+  digits_num = 0
+  display.ShowInt(digits_num)
+  return display
+
+# Credit: https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python
+# start listening for button presses
+def init_servo_man():
+  servo_man = ServoManager()
+  servo_man.daemon = True
+  servo_man.start()
+  return servo_man
+
 # set globals
 cred = credentials.Certificate("womenshealth-1186b-firebase-adminsdk-lojf4-1123978aa1.json")
 firebase_admin.initialize_app(cred, {'databaseURL': 'https://womenshealth-1186b.firebaseio.com/'})
@@ -55,18 +78,18 @@ presses_ref = doc_snap_ref.get('button_log')
 doc_ref = coll_ref.document(get_serial())
 button = Button(10)
 
-# Credit: https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python
-# start listening for button presses
-servo_man = ServoManager()
-servo_man.daemon = True
-servo_man.start()
 
-# Listen for button
-try:
-    while True:
-        button.wait_for_press()
-        button.wait_for_release()
-        servo_man.inc_press(1)
-        doc_ref.update({'button_log': firestore.ArrayUnion([dt.datetime.now()])})
-except KeyboardInterrupt:
+
+if __name__ == "__main__":
+  display = init_display()
+  servo_man = init_servo_man()
+  digits_num = 0
+  # Listen for button
+  try:
+      while True:
+          button.wait_for_press()
+          button.wait_for_release()
+          digits_num = process_press(display, servo_man, digits_num)
+  except KeyboardInterrupt:
+    display.Clear()
     print("End")

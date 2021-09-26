@@ -46,6 +46,7 @@ devices_ref = db.collection('devices/' + get_serial() + '/button_log')
 last_id = str(get_last_document(devices_ref).id)
 button = Button(10)
 
+# Credit: https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python
 # start listening for button presses
 servo_man = ServoManager()
 servo_man.daemon = True

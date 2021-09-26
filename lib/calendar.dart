@@ -31,10 +31,16 @@ class _Calendar extends State<Calendar> {
   }
 
   List<dynamic> _getEventsForDay(day) {
-    return _events[day] ?? [];
+    List<dynamic> v_emi = [];
+    _events.forEach((k, v){
+      if(day.toString().substring(0, day.toString().length-1) == k.toString()){
+        v_emi = v;
+      }
+    });
+    return v_emi ?? [];
   }
 
-  Widget buildBody(Map<DateTime, List<String>> my_events){
+  Widget buildBody(){
     return Column(
       children: <Widget>[
         TableCalendar(
@@ -88,30 +94,22 @@ class _Calendar extends State<Calendar> {
             }
           },
           eventLoader: (day) {
-            List<String> v_emi = [];
-            my_events.forEach((k, v){
-              if(day.toString().substring(0, day.toString().length-1) == k.toString()){
-                v_emi = v;
-              }
-            });
-            return v_emi;
+            return _getEventsForDay(day);
           },
           onPageChanged: (focusedDay) {
             // No need to call `setState()` here
             _focusedDay = focusedDay;
           },
-          calendarBuilders: CalendarBuilders(),
         ),
-        SizedBox(height: Constants.spacer),
-        _getEventsForDay(_selectedDay).length >
-            0
+        const SizedBox(height: Constants.spacer),
+        _getEventsForDay(_selectedDay).isNotEmpty
             ? Text(
             'Number of tampons: ' +
                 _getEventsForDay(
                     _selectedDay)
                     .length
                     .toString(),
-            style: TextStyle(
+            style: const TextStyle(
                 fontSize:
                 Constants.mediumFont))
             : const SizedBox(height: 29.0),
@@ -163,10 +161,12 @@ class _Calendar extends State<Calendar> {
                                         my_events[key] = value;
                                       }
 
-                                      return buildBody(my_events);
+                                      _events = my_events;
+
+                                      return buildBody();
                                     }
                                     else{
-                                      return Center(
+                                      return const Center(
                                           child: SizedBox(
                                               width: 100,
                                               height: 100,
@@ -174,7 +174,6 @@ class _Calendar extends State<Calendar> {
                                                   strokeWidth: 12,
                                                   color: Constants.color2)));
                                     }
-
                                   })
                             ]))))));
   }

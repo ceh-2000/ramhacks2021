@@ -7,6 +7,7 @@ from gpiozero import Button
 from servo_manager import *
 
 # Get last document in a collection as a dict
+# Unused, but kept in case later
 def get_last_document(ref):
   max_doc = list(ref.get())[0]
   for i in list(ref.get()):
@@ -30,20 +31,28 @@ def get_serial():
 
   return cpuserial
 
+# unused, but kept in case
 def create_document(id):
   id = str(id)
-  doc_ref = devices_ref.document(id)
+  doc_ref = log_ref.document(id)
   new_user = {
 	  "time": dt.datetime.now()
   }
   doc_ref.set(new_user)
 
+def get_matching_doc(coll, key):
+  for i in coll_ref.get():
+    if i.id == key:
+      return i
+
 # set globals
 cred = credentials.Certificate("womenshealth-1186b-firebase-adminsdk-lojf4-1123978aa1.json")
 firebase_admin.initialize_app(cred, {'databaseURL': 'https://womenshealth-1186b.firebaseio.com/'})
 db = firestore.client()
-devices_ref = db.collection('devices/' + get_serial() + '/button_log')
-last_id = str(get_last_document(devices_ref).id)
+coll_ref = db.collection('devices')
+doc_snap_ref = get_matching_doc(coll_ref, get_serial())
+presses_ref = doc_snap_ref.get('button_log')
+doc_ref = coll_ref.document(get_serial())
 button = Button(10)
 
 # Credit: https://www.toptal.com/python/beginners-guide-to-concurrency-and-parallelism-in-python
@@ -57,8 +66,7 @@ try:
     while True:
         button.wait_for_press()
         button.wait_for_release()
-        last_id = str(int(last_id) + 1)
         servo_man.inc_press(1)
-        create_document(last_id)
+        doc_ref.update({'button_log': firestore.ArrayUnion([dt.datetime.now()])})
 except KeyboardInterrupt:
     print("End")

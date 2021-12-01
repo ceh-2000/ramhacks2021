@@ -51,7 +51,7 @@ class _Report extends State<Report> {
         _sumTampons += all_the_data[i].count;
         _numDaysInCycle += 1;
 
-        if(all_the_data[i].count > _periodHeaviestDay){
+        if (all_the_data[i].count > _periodHeaviestDay) {
           _periodHeaviestDay = all_the_data[i].count;
         }
 
@@ -59,8 +59,8 @@ class _Report extends State<Report> {
           DateTime curDate = all_the_data[i].date_time;
           DateTime prevDate = all_the_data[i + 1].date_time;
 
-
-          if (curDate.difference(prevDate).inDays > 1) {
+          // We assume your period is fairly continuous, so if it's been over two days between when you last got a tampon then break
+          if (prevDate.difference(curDate).inDays > 2) {
             break;
           } else {
             dates.add(all_the_data[i]);
@@ -68,13 +68,25 @@ class _Report extends State<Report> {
         }
       }
 
-      DateTime startDate = dates[dates.length - 1].date_time;
-      _numDaysInCycle = dates.length+1;
-      _periodStartDate = months[startDate.month.toString()].toString() +
-          ' ' +
-          startDate.day.toString();
+      // We actually have a period that lasted some time
+      if (dates.isNotEmpty) {
+        DateTime startDate = dates[dates.length - 1].date_time;
+        _numDaysInCycle = dates.length + 1;
 
-      _tamponsUsedAverage = (_sumTampons / _numDaysInCycle+1).floor();
+        _periodStartDate = months[startDate.month.toString()].toString() +
+            ' ' +
+            startDate.day.toString();
+
+        _tamponsUsedAverage = (_sumTampons / _numDaysInCycle + 1).floor();
+      }
+      // Case if we only have one date in the cycle so far
+      else {
+        _numDaysInCycle = 1;
+        _periodStartDate = months[endDate.month.toString()].toString() +
+            ' ' +
+            endDate.day.toString();
+        _tamponsUsedAverage = _periodHeaviestDay;
+      }
     }
   }
 
@@ -123,7 +135,7 @@ class _Report extends State<Report> {
           SizedBox(height: Constants.spacer),
           Row(children: <Widget>[
             Text('Your period lasted',
-                    style: TextStyle(fontSize: Constants.smallFont)),
+                style: TextStyle(fontSize: Constants.smallFont)),
             SizedBox(width: Constants.spacer),
             Container(
                 decoration: BoxDecoration(
@@ -139,7 +151,7 @@ class _Report extends State<Report> {
                         fontSize: Constants.mediumFont))),
             SizedBox(width: Constants.spacer),
             Flexible(
-                child: Text('days.',
+                child: Text(_numDaysInCycle == 1 ? 'day.' : 'days.',
                     style: TextStyle(fontSize: Constants.smallFont)))
           ]),
           SizedBox(height: Constants.spacer),
@@ -161,8 +173,9 @@ class _Report extends State<Report> {
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
             SizedBox(width: 5.0),
-            Text('tampons on your heaviest day.',
-                style: TextStyle(fontSize: Constants.smallFont))
+            Flexible(
+                child: Text('tampons on your heaviest day.',
+                    style: TextStyle(fontSize: Constants.smallFont)))
           ]),
           SizedBox(height: Constants.spacer),
           Row(children: <Widget>[
@@ -183,13 +196,15 @@ class _Report extends State<Report> {
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
             SizedBox(width: 5.0),
-            Text('tampons on average per day.',
-                style: TextStyle(fontSize: Constants.smallFont))
+            Flexible(
+                child: Text('tampons on average per day.',
+                    style: TextStyle(fontSize: Constants.smallFont)))
           ]),
           SizedBox(height: Constants.spacer),
           Row(children: <Widget>[
-            Text('You spent',
-                    style: TextStyle(fontSize: Constants.smallFont)),
+            Flexible(
+                child: Text('You spent',
+                    style: TextStyle(fontSize: Constants.smallFont))),
             SizedBox(width: Constants.spacer),
             Container(
                 padding: EdgeInsets.all(10.0),
@@ -199,13 +214,18 @@ class _Report extends State<Report> {
                       color: Constants.color1,
                     ),
                     borderRadius: BorderRadius.all(Radius.circular(20))),
-                child: Text('\~\$'+(num.parse((_sumTampons*AVG_COST_PER_TAMPON).toStringAsFixed(2))).toString(),
+                child: Text(
+                    '\~\$' +
+                        (num.parse((_sumTampons * AVG_COST_PER_TAMPON)
+                                .toStringAsFixed(2)))
+                            .toString(),
                     style: TextStyle(
                         color: Constants.white,
                         fontSize: Constants.mediumFont))),
             SizedBox(width: Constants.spacer),
-            Text('on tampons.',
-                style: TextStyle(fontSize: Constants.smallFont))
+            Flexible(
+                child: Text('on tampons.',
+                    style: TextStyle(fontSize: Constants.smallFont)))
           ]),
           SizedBox(height: Constants.spacer),
         ]);
@@ -234,7 +254,7 @@ class _Report extends State<Report> {
                                 AsyncSnapshot<QuerySnapshot> snapshot) {
                               // We got no data yet so let's wait...
                               if (!snapshot.hasData) {
-                                return Center(
+                                return const Center(
                                     child: SizedBox(
                                         width: 100,
                                         height: 100,

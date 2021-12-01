@@ -62,6 +62,8 @@ class _Calendar extends State<Calendar> {
               color: Colors.red,
               size: 15.0,
             ),
+            markersAutoAligned: false,
+            markersOffset: PositionedOffset(bottom: 20, start: 0),
             selectedDecoration: BoxDecoration(
               color: Constants.color1Dark,
               shape: BoxShape.circle,

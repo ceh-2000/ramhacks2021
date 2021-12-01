@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:http/http.dart' as http;
 import 'constants.dart';
 
 class Mission extends StatefulWidget {
@@ -33,12 +33,12 @@ class _Mission extends State<Mission> {
                               Text(
                                   'Menstrual health is a heavily stigmatized topic, redirecting the focus from the real task at hand: ensuring folks are connected to resources that will make “that time of the month” just a little bit easier. We wanted to build one such resource: something that would automate the period tracking process, making it easier to stay on top of your periods cycle and report to your gynecologist of any irregularities.', textAlign: TextAlign.justify, style: TextStyle(fontSize: 22)),
                               SizedBox(height: Constants.spacer),
-                              ElevatedButton(
-                                  onPressed: () {
-                                    // TODO: Call Pablo's function
-
-                                  },
-                                  child: Text('Dispense Tampon', style: TextStyle(fontSize: Constants.mediumFont)))
+                              // ElevatedButton(
+                              //     onPressed: () {
+                              //       // TODO: Call Pablo's function
+                              //       http.get(Uri.parse('https://massive-cougar-49.loca.lt/requests?amount=1'));
+                              //     },
+                              //     child: Text('Dispense Tampon', style: TextStyle(fontSize: Constants.mediumFont)))
                             ]))))));
   }
 }

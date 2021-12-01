@@ -1,6 +1,7 @@
-from gpiozero import Servo
+from gpiozero import AngularServo
 from threading import Thread
 from time import sleep
+import RPi.GPIO as GPIO
 
 class ServoManager(Thread):
     def __init__(self):
@@ -9,12 +10,18 @@ class ServoManager(Thread):
 
     # Credit: https://www.raspberrypi.org/forums/viewtopic.php?t=179888
     def dip(self):
-        servo = Servo(12)
-        servo.min()
-        sleep(0.5)
-        servo.max()
-        sleep(0.5)
-        servo.min()
+        servo = AngularServo(12, min_angle=0, max_angle=360, min_pulse_width=.0001, max_pulse_width=.005, frame_width=0.05)
+        # for i in range(0, 370, 10):
+        servo.angle = 60
+        sleep(1)
+        print(servo.angle)
+        servo.angle = 170
+        sleep(1)
+        print(servo.angle)
+        servo.angle = 60
+        sleep(1)
+        print(servo.angle)
+
 
     def inc_press(self, x):
         self.button_presses += x
